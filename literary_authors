@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Literary Authors Quiz — 50 Questions</title>
+<style>
+:root { color-scheme: light; --ink:#18202b; --muted:#657080; --accent:#315d7c; --paper:#f5f3ee; --card:#fff; }
+* { box-sizing:border-box }
+body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--paper); color:var(--ink); }
+main { max-width:850px; margin:0 auto; padding:24px 16px 48px; }
+header { text-align:center; margin-bottom:20px; }
+h1 { margin:0 0 8px; font-size:clamp(1.6rem,4vw,2.4rem); }
+header p { margin:0; color:var(--muted); }
+.panel { background:var(--card); border-radius:18px; padding:22px; box-shadow:0 5px 20px #0000000b; }
+.topline { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; color:var(--muted); font-weight:600; }
+.progress { height:8px; background:#e5e8eb; border-radius:99px; overflow:hidden; margin:14px 0 22px; }
+.progress div { height:100%; width:0; background:var(--accent); transition:width .2s; }
+.quote { font-family:Georgia,serif; font-size:clamp(1.25rem,3vw,1.8rem); line-height:1.5; margin:18px 0 24px; }
+.options { display:grid; gap:10px; }
+.option { width:100%; border:1px solid #d8dde3; background:white; color:var(--ink); border-radius:12px; padding:13px 15px; text-align:left; font-size:1rem; cursor:pointer; }
+.option:hover { border-color:var(--accent); background:#f7fbff; }
+.option:disabled { cursor:default; }
+.option.correct { background:#e8f5eb; border-color:#3b8b57; }
+.option.wrong { background:#fae8e7; border-color:#c74e45; }
+.feedback { margin-top:16px; padding:14px; border-radius:12px; background:#f0f3f6; display:none; }
+.feedback.show { display:block; }
+.meta { color:var(--muted); margin-top:8px; font-size:.95rem; }
+.controls { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+button.primary { background:var(--accent); color:white; border:0; border-radius:10px; padding:12px 18px; font-weight:700; cursor:pointer; }
+button.secondary { background:#e7ebef; color:var(--ink); border:0; border-radius:10px; padding:12px 18px; font-weight:700; cursor:pointer; }
+button:disabled { opacity:.45; cursor:not-allowed; }
+.result { text-align:center; display:none; }
+.result.show { display:block; }
+.result h2 { font-size:2rem; }
+.small { color:var(--muted); font-size:.9rem; }
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>Literary Authors Quiz</h1>
+<p>50 quotations • Authors from the 15th–20th centuries • Choose the author only</p>
+</header>
+<section class="panel" id="quiz">
+<div class="topline"><span id="counter">Question 1 of 50</span><span id="score">Score: 0</span></div>
+<div class="progress"><div id="bar"></div></div>
+<div class="quote" id="quote"></div>
+<div class="options" id="options"></div>
+<div class="feedback" id="feedback"></div>
+<div class="controls">
+<button class="secondary" id="restart">Restart quiz</button>
+<button class="primary" id="next" disabled>Next question</button>
+</div>
+</section>
+<section class="panel result" id="result">
+<h2>Quiz complete!</h2>
+<p id="finalscore"></p>
+<p class="small">Try again to improve your score.</p>
+<button class="primary" id="again">Play again</button>
+</section>
+</main>
+<script>
+const data = [["“To be, or not to be: that is the question.”", "William Shakespeare", 1564, 1616, "Hamlet"], ["“All the world's a stage, and all the men and women merely players.”", "William Shakespeare", 1564, 1616, "As You Like It"], ["“It was the best of times, it was the worst of times.”", "Charles Dickens", 1812, 1870, "A Tale of Two Cities"], ["“Please, sir, I want some more.”", "Charles Dickens", 1812, 1870, "Oliver Twist"], ["“Call me Ishmael.”", "Herman Melville", 1819, 1891, "Moby-Dick"], ["“It is a truth universally acknowledged…”", "Jane Austen", 1775, 1817, "Pride and Prejudice"], ["“Reader, I married him.”", "Charlotte Brontë", 1816, 1855, "Jane Eyre"], ["“I am no bird; and no net ensnares me.”", "Charlotte Brontë", 1816, 1855, "Jane Eyre"], ["“All happy families are alike; each unhappy family is unhappy in its own way.”", "Leo Tolstoy", 1828, 1910, "Anna Karenina"], ["“The world is a book, and those who do not travel read only one page.”", "Augustine of Hippo", 354, 430, "Confessions (popular attribution is disputed)"], ["“I have measured out my life with coffee spoons.”", "T. S. Eliot", 1888, 1965, "The Love Song of J. Alfred Prufrock"], ["“April is the cruellest month…”", "T. S. Eliot", 1888, 1965, "The Waste Land"], ["“The horror! The horror!”", "Joseph Conrad", 1857, 1924, "Heart of Darkness"], ["“The old man was thin and gaunt…”", "Ernest Hemingway", 1899, 1961, "The Old Man and the Sea"], ["“In my beginning is my end.”", "T. S. Eliot", 1888, 1965, "East Coker"], ["“It was a bright cold day in April…”", "George Orwell", 1903, 1950, "Nineteen Eighty-Four"], ["“Big Brother is watching you.”", "George Orwell", 1903, 1950, "Nineteen Eighty-Four"], ["“Some are born great, some achieve greatness…”", "William Shakespeare", 1564, 1616, "Twelfth Night"], ["“The course of true love never did run smooth.”", "William Shakespeare", 1564, 1616, "A Midsummer Night’s Dream"], ["“Brevity is the soul of wit.”", "William Shakespeare", 1564, 1616, "Hamlet"], ["“The lady doth protest too much, methinks.”", "William Shakespeare", 1564, 1616, "Hamlet"], ["“A horse! a horse! my kingdom for a horse!”", "William Shakespeare", 1564, 1616, "Richard III"], ["“There is nothing either good or bad, but thinking makes it so.”", "William Shakespeare", 1564, 1616, "Hamlet"], ["“The quality of mercy is not strained.”", "William Shakespeare", 1564, 1616, "The Merchant of Venice"], ["“Attention must be paid.”", "Arthur Miller", 1915, 2005, "Death of a Salesman"], ["“The only way to get rid of a temptation is to yield to it.”", "Oscar Wilde", 1854, 1900, "The Picture of Dorian Gray"], ["“We are all in the gutter, but some of us are looking at the stars.”", "Oscar Wilde", 1854, 1900, "Lady Windermere’s Fan"], ["“Experience is simply the name we give our mistakes.”", "Oscar Wilde", 1854, 1900, "The Picture of Dorian Gray"], ["“It is a truth universally acknowledged…”", "Jane Austen", 1775, 1817, "Pride and Prejudice"], ["“I could easily forgive his pride, if he had not mortified mine.”", "Jane Austen", 1775, 1817, "Pride and Prejudice"], ["“There is no charm equal to tenderness of heart.”", "Jane Austen", 1775, 1817, "Emma"], ["“The woods are lovely, dark and deep…”", "Robert Frost", 1874, 1963, "Stopping by Woods on a Snowy Evening"], ["“Two roads diverged in a yellow wood…”", "Robert Frost", 1874, 1963, "The Road Not Taken"], ["“Because I could not stop for Death—”", "Emily Dickinson", 1830, 1886, "Because I could not stop for Death"], ["“Hope is the thing with feathers—”", "Emily Dickinson", 1830, 1886, "Hope is the thing with feathers"], ["“I wandered lonely as a cloud…”", "William Wordsworth", 1770, 1850, "I Wandered Lonely as a Cloud"], ["“The child is father of the man.”", "William Wordsworth", 1770, 1850, "My Heart Leaps Up"], ["“O my Luve is like a red, red rose.”", "Robert Burns", 1759, 1796, "A Red, Red Rose"], ["“Should auld acquaintance be forgot…”", "Robert Burns", 1759, 1796, "Auld Lang Syne"], ["“If music be the food of love, play on.”", "William Shakespeare", 1564, 1616, "Twelfth Night"], ["“The mind is its own place…”", "John Milton", 1608, 1674, "Paradise Lost"], ["“Better to reign in Hell, than serve in Heaven.”", "John Milton", 1608, 1674, "Paradise Lost"], ["“All that glisters is not gold.”", "William Shakespeare", 1564, 1616, "The Merchant of Venice"], ["“A little knowledge is a dangerous thing.”", "Alexander Pope", 1688, 1744, "An Essay on Criticism"], ["“To err is human; to forgive, divine.”", "Alexander Pope", 1688, 1744, "An Essay on Criticism"], ["“The proper study of mankind is man.”", "Alexander Pope", 1688, 1744, "An Essay on Man"], ["“I am a man more sinned against than sinning.”", "William Shakespeare", 1564, 1616, "King Lear"], ["“Out, out, brief candle!”", "William Shakespeare", 1564, 1616, "Macbeth"], ["“The world is too much with us; late and soon…”", "William Wordsworth", 1770, 1850, "The World Is Too Much with Us"], ["“The sun never sets on the British Empire.”", "John Wilson", 1785, 1854, "The phrase is often attributed to John Wilson"]];
+const allAuthors = [...new Set(data.map(q=>q[1]))];
+let order=[], index=0, score=0, answered=false;
+const quoteEl=document.getElementById('quote'), optionsEl=document.getElementById('options');
+function shuffle(a) { return [...a].sort(()=>Math.random()-0.5); }
+function start() {
+ order=shuffle(data.map((_,i)=>i)); index=0; score=0; answered=false;
+ document.getElementById('quiz').style.display='block'; document.getElementById('result').classList.remove('show');
+ render();
+}
+function render() {
+ answered=false; const q=data[order[index]];
+ document.getElementById('counter').textContent=`Question ${index+1} of ${data.length}`;
+ document.getElementById('score').textContent=`Score: ${score}`;
+ document.getElementById('bar').style.width=`${index/data.length*100}%`;
+ quoteEl.textContent=q[0]; optionsEl.innerHTML='';
+ const choices=shuffle([q[1],...shuffle(allAuthors.filter(a=>a!==q[1])).slice(0,3)]);
+ choices.forEach(name=>{
+   const b=document.createElement('button'); b.className='option'; b.textContent=name;
+   b.onclick=()=>choose(b,name,q,choices); optionsEl.appendChild(b);
+ });
+ document.getElementById('feedback').className='feedback'; document.getElementById('feedback').innerHTML='';
+ document.getElementById('next').disabled=true;
+}
+function choose(button,name,q,choices) {
+ if(answered) return; answered=true;
+ const correct=name===q[1]; if(correct) score++;
+ [...optionsEl.children].forEach(b=>{ b.disabled=true; if(b.textContent===q[1]) b.classList.add('correct'); });
+ if(!correct) button.classList.add('wrong');
+ const f=document.getElementById('feedback');
+ f.className='feedback show';
+ f.innerHTML=`<strong>${correct?'Correct!':'Not quite.'}</strong> The author is <strong>${q[1]}</strong> (${q[2]}–${q[3]}).<div class="meta">Work: <em>${q[4]}</em></div>`;
+ document.getElementById('score').textContent=`Score: ${score}`;
+ document.getElementById('next').disabled=false;
+}
+document.getElementById('next').onclick=()=>{ index++; if(index>=data.length) finish(); else render(); };
+function finish() {
+ document.getElementById('quiz').style.display='none'; document.getElementById('result').classList.add('show');
+ document.getElementById('finalscore').textContent=`You scored ${score} out of ${data.length} (${Math.round(score/data.length*100)}%).`;
+}
+document.getElementById('restart').onclick=start;
+document.getElementById('again').onclick=start;
+start();
+</script>
+</body>
+</html>
